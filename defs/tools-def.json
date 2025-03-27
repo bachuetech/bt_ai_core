@@ -1,0 +1,76 @@
+{
+  "tools": [
+    {
+      "type": "function",
+      "function": {
+        "name": "get_current_weather",
+        "description": "Get the current weather for a city",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "city": {
+              "type": "string",
+              "description": "The name of the city"
+            },
+            "country_code": {
+              "type": "string",
+              "description": "The two-letter country code"
+            }
+          },
+          "required": [
+            "city",
+            "country_code"
+          ]
+        }
+      }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "do_basic_math",
+        "description": "Do basic math operations",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "a": {
+              "type": "decimal",
+              "description": "The first numeric operand"
+            },
+            "op": {
+              "type": "string",
+              "description": "The operation to perform, one of '+', '-', '*', '/', '^' only"
+            },
+            "b": {
+              "type": "decimal",
+              "description": "The second numeric operand"
+            }
+          },
+          "required": [
+            "a",
+            "op",
+            "b"
+          ]
+        }
+      }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "do_math_expressions",
+        "description": "Resolve mathemathical expressions",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "expression": {
+              "type": "String",
+              "description": "Mathematical expression that can be evaluated to obtain a result using numbers (integers, real, decimal, floats), operators such as '+', '-', '*', '/', '^', '(', ')', functions such as 'sqrt','sin','cos','tan' and constants such as PI and E"
+            }
+          },
+          "required": [
+            "expression"
+          ]
+        }
+      }
+    }
+  ]
+}

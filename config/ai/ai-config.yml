@@ -1,0 +1,42 @@
+#This file is Case sensitive
+name: BT_AI
+dev:
+  platform:
+    - name: wrong
+      server:
+        host: 127.0.0.1
+        port: 98652
+        secure: false
+      api:
+        ctx_max: -1
+        path: api
+        chat: chat
+        generate: generate
+        models: tags
+    - name: OLLAMALOCAL
+      server:
+        host: localhost
+        port: 11434
+        secure: false
+      api:
+        ctx_max: 20
+        path: api
+        chat: chat
+        generate: generate
+        models: tags
+      models:
+        - model_id: guardian
+          model: granite3-guardian:8b-fp16
+          tool_support: false
+          system: Answer only either Yes or No. 
+          tools: NONE      
+        - model_id: llama3.1
+          model: llama3.1:70b-instruct-q2_K
+          tool_support: false
+          system: You are an AI assitant. 
+          tools: ALL
+        - model_id: default
+          model: llama3.3:70b-instruct-q2_K
+          tool_support: false
+          system: You are an AI assitant
+          tools: NONE          
