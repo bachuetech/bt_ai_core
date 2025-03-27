@@ -50,7 +50,7 @@ pub struct ToolParamProperty{
 }
 
 impl AIToolManager {
-    pub fn new(run_environment: String) -> Self {
+    pub fn new(run_environment: &String) -> Self {
         let tools_def: String;
         match get_file(TOOLS_JSON_DEF_ENV_VAR_NAME, TOOLS_JSON_DEF){
             Ok(j_file_conf) => tools_def = j_file_conf,
@@ -121,7 +121,7 @@ mod tests_ai_tools{
     #[test]
     fn test_ai_get_tools_ok(){
         build_logger("BACHUETECH", "BT.AI_CONFIG", LogLevel::VERBOSE, LogTarget::STD_ERROR );
-        let aitm = AIToolManager::new("dev".to_owned());
+        let aitm = AIToolManager::new(&"dev".to_owned());
         let t = aitm.get_tools(&"OLLAMALOCAL".to_owned(), &"llama3.1".to_owned());
         assert_eq!(t.unwrap().len(),3); 
     }
@@ -129,7 +129,7 @@ mod tests_ai_tools{
     #[test]
     fn test_ai_get_tools_list(){
         build_logger("BACHUETECH", "BT.AI_CONFIG", LogLevel::VERBOSE, LogTarget::STD_ERROR );
-        let aitm = AIToolManager::new("dev".to_owned());
+        let aitm = AIToolManager::new(&"dev".to_owned());
         let t = aitm.get_tools(&"OLLAMALOCAL".to_owned(), &"tlist".to_owned());
         assert_eq!(t.clone().unwrap().len(),1); 
         assert_eq!(t.unwrap()[0].function.name,"do_basic_math");
@@ -138,7 +138,7 @@ mod tests_ai_tools{
     #[test]
     fn test_ai_get_tools_none(){
         build_logger("BACHUETECH", "BT.AI_CONFIG", LogLevel::VERBOSE, LogTarget::STD_ERROR );
-        let aitm = AIToolManager::new("dev".to_owned());
+        let aitm = AIToolManager::new(&"dev".to_owned());
         let t = aitm.get_tools(&"OLLAMALOCAL".to_owned(), &"guardian".to_owned());
         assert!(t.is_none()); 
     }
@@ -146,7 +146,7 @@ mod tests_ai_tools{
     #[test]
     fn test_ai_get_tools_fakemodel(){
         build_logger("BACHUETECH", "BT.AI_CONFIG", LogLevel::VERBOSE, LogTarget::STD_ERROR );
-        let aitm = AIToolManager::new("dev".to_owned());
+        let aitm = AIToolManager::new(&"dev".to_owned());
         let t = aitm.get_tools(&"OLLAMALOCAL".to_owned(), &"FAKEMODEL:ver123".to_owned());
         assert!(t.is_none());  
     }
@@ -154,7 +154,7 @@ mod tests_ai_tools{
     #[test]
     fn test_ai_get_tools_invplatf(){
         build_logger("BACHUETECH", "BT.AI_CONFIG", LogLevel::VERBOSE, LogTarget::STD_ERROR );
-        let aitm = AIToolManager::new("dev".to_owned());
+        let aitm = AIToolManager::new(&"dev".to_owned());
         let t = aitm.get_tools(&"INVALID".to_owned(), &"llama3.1".to_owned());
         assert!(t.is_none());  
     }
@@ -162,7 +162,7 @@ mod tests_ai_tools{
     #[test]
     fn test_ai_get_tools_unknowenv(){
         build_logger("BACHUETECH", "BT.AI_CONFIG", LogLevel::VERBOSE, LogTarget::STD_ERROR );
-        let aitm = AIToolManager::new("UNKNOWN".to_owned());
+        let aitm = AIToolManager::new(&"UNKNOWN".to_owned());
         let t = aitm.get_tools(&"OLLAMALOCAL".to_owned(), &"llama3.1".to_owned());
         assert!(t.is_none()); 
     }
@@ -170,14 +170,14 @@ mod tests_ai_tools{
     #[test]
     fn test_ai_toolmgr_success(){
         build_logger("BACHUETECH", "BT.AI_CONFIG", LogLevel::VERBOSE, LogTarget::STD_ERROR );
-        let aitm = AIToolManager::new("dev".to_owned());
+        let aitm = AIToolManager::new(&"dev".to_owned());
         assert_eq!(aitm.tools.unwrap().tools.len(),3); 
     }
 
     #[test]
     fn test_ai_toolmgr_common_success(){
         build_logger("BACHUETECH", "BT.AI_CONFIG", LogLevel::VERBOSE, LogTarget::STD_ERROR );
-        let aitm = AIToolManager::new("dev".to_owned());
+        let aitm = AIToolManager::new(&"dev".to_owned());
         let sf = SupportedFunctions::Functions(vec!["do_math_expressions".to_string()]);
         assert_eq!(aitm.get_common_tools(sf).unwrap()[0].function.name,"do_math_expressions"); //do_math_expressions is common
     }
@@ -185,7 +185,7 @@ mod tests_ai_tools{
     #[test]
     fn test_ai_toolmgr_common_all(){
         build_logger("BACHUETECH", "BT.AI_CONFIG", LogLevel::VERBOSE, LogTarget::STD_ERROR );
-        let aitm = AIToolManager::new("dev".to_owned());
+        let aitm = AIToolManager::new(&"dev".to_owned());
         let sf = SupportedFunctions::ALL;
         assert_eq!(aitm.get_common_tools(sf.clone()).unwrap()[0].function.name,"get_current_weather"); 
         assert_eq!(aitm.get_common_tools(sf).unwrap()[2].function.name,"do_math_expressions"); 
@@ -194,7 +194,7 @@ mod tests_ai_tools{
     #[test]
     fn test_ai_toolmgr_common_none(){
         build_logger("BACHUETECH", "BT.AI_CONFIG", LogLevel::VERBOSE, LogTarget::STD_ERROR );
-        let aitm = AIToolManager::new("dev".to_owned());
+        let aitm = AIToolManager::new(&"dev".to_owned());
         let sf = SupportedFunctions::NONE;
         assert!(aitm.get_common_tools(sf.clone()).is_none()); 
     }
@@ -202,7 +202,7 @@ mod tests_ai_tools{
     #[test]
     fn test_ai_toolmgr_nocommon(){
         build_logger("BACHUETECH", "BT.AI_CONFIG", LogLevel::VERBOSE, LogTarget::STD_ERROR );
-        let aitm = AIToolManager::new("dev".to_owned());
+        let aitm = AIToolManager::new(&"dev".to_owned());
         let sf = SupportedFunctions::Functions(vec!["do_nothing".to_string()]);
         println!("{:?}",&aitm.get_common_tools(sf.clone()));
         assert_eq!(aitm.get_common_tools(sf).unwrap().len(),0); //Zero function in common
