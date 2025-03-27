@@ -27,16 +27,18 @@ dev:
       models:
         - model_id: guardian
           model: granite3-guardian:8b-fp16
-          tool_support: false
           system: Answer only either Yes or No. 
-          tools: NONE      
+          tools: NONE
+        - model_id: tlist
+          model: granite3-guardian:8b-fp16
+          system: Answer only either Yes or No. 
+          tools:
+            - do_basic_math                
         - model_id: llama3.1
           model: llama3.1:70b-instruct-q2_K
-          tool_support: false
           system: You are an AI assitant. 
           tools: ALL
         - model_id: default
           model: llama3.3:70b-instruct-q2_K
-          tool_support: false
           system: You are an AI assitant
           tools: NONE          

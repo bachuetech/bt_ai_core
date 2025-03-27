@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use super::ai_tools::ToolToCall;
+use crate::ai_tool_to_call::ToolToCall;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "lowercase")]
@@ -56,10 +56,8 @@ impl Message{
 #[cfg(test)]
 mod tests_message{
     use std::collections::HashMap;
-
     use serde_json::Value;
-
-    use crate::ai_tools::ToolToCall;
+    use crate::ai_tool_to_call::ToolToCall;
 
     use super::{Message, MessageRole};
 

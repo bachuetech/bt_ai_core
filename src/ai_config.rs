@@ -82,7 +82,7 @@ impl From<Yaml> for SupportedFunctions {
 #[derive(Debug)]
 pub struct Model{
     pub model: String,
-    pub tool_support: bool,
+    //pub tool_support: bool,
     pub system: String,
     pub tools: SupportedFunctions,
 }
@@ -159,12 +159,9 @@ impl AIConfig {
                     cfg_ctx_max = DEFAULT_MAX_CTX_SIZE;
                 },
             }
-            //let cfg_ctx_max = plat["api"]["ctx_max"].as_i64().unwrap_or(5);
+
             let api_data = AIApis {
                 ctx_max: cfg_ctx_max,
-                    //usize::try_from(plat["api"]["ctx_max"].as_i64().unwrap_or(5))
-                    //.ok()
-                    //.expect(get_fatal!("new","Maximun Size of Context (ctx_max = {:?}) in AI YML config file is invalid",plat["api"]["ctx_max"]).as_str()),
                 path: plat["api"]["path"].as_str().unwrap_or("api").to_owned(),
                 chat: plat["api"]["chat"].as_str().unwrap_or("chat").to_owned(),
                 generate: plat["api"]["generate"].as_str().unwrap_or("generate").to_owned(),
@@ -186,7 +183,7 @@ impl AIConfig {
                     m["model_id"].as_str().unwrap_or("default").to_owned(),
                     Model{
                         model: m["model"].as_str().unwrap_or(m["model_id"].as_str().unwrap_or("default")).to_owned(),
-                        tool_support: m["tool_support"].as_bool().unwrap_or(false),
+                        //tool_support: m["tool_support"].as_bool().unwrap_or(false),
                         system: m["system"].as_str().unwrap_or("You are an AI assistance").to_owned(),
                         tools: SupportedFunctions::from(m["tools"].clone()),
                     },
@@ -321,7 +318,7 @@ mod tests_ai_config{
         assert_eq!(cfg.get_url("OLLAMALOCAL".to_string(), InteractionType::Chat),"http://localhost:11434/api/chat");
         assert_eq!(cfg.get_url("OLLAMALOCAL".to_string(), InteractionType::Generate),"http://localhost:11434/api/generate");
         assert_eq!(cfg.get_url("OLLAMALOCAL".to_string(), InteractionType::Models),"http://localhost:11434/api/tags");
-        assert_eq!(cfg.get_models(&"OLLAMALOCAL".to_string()).unwrap().len(),3);
+        assert_eq!(cfg.get_models(&"OLLAMALOCAL".to_string()).unwrap().len(),4);
     }
 
     #[test]
