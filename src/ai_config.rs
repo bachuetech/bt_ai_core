@@ -258,11 +258,42 @@ impl AIConfig {
         }
     }
 
+    pub fn get_model(&self, platform_name: &String, model_id: &String, model_version: &String) -> String {
+        if let Some(p) = self.get_models(platform_name) {
+            if let Some(model) = p.get(model_id) {
+                return model.model.clone()
+            } 
+        }
+
+        if model_version.trim().len() > 0{
+            return format!("{}:{}",model_id.clone(),model_version)
+        }else{
+            return model_id.clone()
+        }
+    }    
+
+    pub fn get_system_msg(&self, platform_name: &String, model_id: &String) -> Option<String> {
+        if let Some(p) = self.get_models(platform_name) {
+            if let Some(sys) = p.get(model_id) {
+                Some(format!("{}. {}", format!("Your Are {}", self.get_name()), sys.system))
+            } else {
+                if model_id.to_lowercase() == "default" {
+                    None
+                } else {
+                    self.get_system_msg(platform_name, &"default".to_owned())
+                }
+            }
+        } else {
+            None
+        }
+    }
+
     pub fn get_max_ctx_size(&self, platform_name: &String) -> usize {
         if let Some(p) = self.get_platform(platform_name) {
             p.api.ctx_max as usize
         }else{
-            1
+            log_warning!("get_max_ctx_size","Maximun Size of Context for platform {} not found. Using default value {}",platform_name, DEFAULT_MAX_CTX_SIZE);
+            DEFAULT_MAX_CTX_SIZE
         }
     }
 
@@ -281,7 +312,7 @@ mod tests_ai_config{
 
     
     #[test]
-    fn test_success(){
+    fn test_cfg_success(){
         build_logger("BACHUETECH", "BT.AI_CONFIG", LogLevel::VERBOSE, LogTarget::STD_ERROR );
         let cfg = AIConfig::new(&"dev".to_string());
         assert_eq!(cfg.get_name(),"BT_AI");
@@ -290,11 +321,11 @@ mod tests_ai_config{
         assert_eq!(cfg.get_url("OLLAMALOCAL".to_string(), InteractionType::Chat),"http://localhost:11434/api/chat");
         assert_eq!(cfg.get_url("OLLAMALOCAL".to_string(), InteractionType::Generate),"http://localhost:11434/api/generate");
         assert_eq!(cfg.get_url("OLLAMALOCAL".to_string(), InteractionType::Models),"http://localhost:11434/api/tags");
-        assert_eq!(cfg.get_models(&"OLLAMALOCAL".to_string()).unwrap().len(),6);
+        assert_eq!(cfg.get_models(&"OLLAMALOCAL".to_string()).unwrap().len(),3);
     }
 
     #[test]
-    fn test_wrong(){
+    fn test_cfg_wrong(){
         build_logger("BACHUETECH", "BT.AI_CONFIG", LogLevel::VERBOSE, LogTarget::STD_ERROR );
         let cfg = AIConfig::new(&"dev".to_string());
          assert_eq!(cfg.get_max_ctx_size(&"wrong".to_string()),5);
@@ -305,12 +336,12 @@ mod tests_ai_config{
     }
 
     #[test]
-    fn test_not_found_success(){
+    fn test_cfg_not_found_success(){
         build_logger("BACHUETECH", "BT.AI_CONFIG", LogLevel::VERBOSE, LogTarget::STD_ERROR );
         let cfg = AIConfig::new(&"UNKNOWN".to_string());  
         assert_eq!(cfg.get_name(),"BT_AI");
         assert_eq!(cfg.get_platform_list().len(),0);  
-        assert_eq!(cfg.get_max_ctx_size(&"UNKNOWN".to_string()),1);
+        assert_eq!(cfg.get_max_ctx_size(&"UNKNOWN".to_string()),5);
         assert_eq!(cfg.get_url("UNKNOWN".to_string(), InteractionType::Chat),"http://localhost/default/chat");
         assert_eq!(cfg.get_url("UNKNOWN".to_string(), InteractionType::Generate),"http://localhost/default/generate");
         assert_eq!(cfg.get_url("UNKNOWN".to_string(), InteractionType::Models),"http://localhost/default/models");        
@@ -338,4 +369,57 @@ mod tests_ai_config{
         
     }
 
+
+    #[test]
+    fn test_not_noenv_sys_msg(){
+        build_logger("BACHUETECH", "BT.AI_CONFIG", LogLevel::VERBOSE, LogTarget::STD_ERROR );
+        let cfg = AIConfig::new(&"UNKNOWN".to_string());  
+        //assert_eq!(cfg.get_system_msg(&"OLLAMALOCAL".to_owned(), &"llama3.1".to_owned()).unwrap(),"You are an AI assitant");
+        assert!(cfg.get_system_msg(&"OLLAMALOCAL".to_owned(), &"llama3.1".to_owned()).is_none());
+    }
+
+    #[test]
+    fn test_sys_msg_success(){
+        build_logger("BACHUETECH", "BT.AI_CONFIG", LogLevel::VERBOSE, LogTarget::STD_ERROR );
+        let cfg = AIConfig::new(&"dev".to_string());
+        assert_eq!(cfg.get_system_msg(&"OLLAMALOCAL".to_owned(), &"guardian".to_owned()).unwrap(),"Your Are BT_AI. Answer only either Yes or No.");
+    }
+
+    #[test]
+    fn test_sys_msg_default(){
+        build_logger("BACHUETECH", "BT.AI_CONFIG", LogLevel::VERBOSE, LogTarget::STD_ERROR );
+        let cfg = AIConfig::new(&"dev".to_string());
+        assert_eq!(cfg.get_system_msg(&"OLLAMALOCAL".to_owned(), &"llama123".to_owned()).unwrap(),"Your Are BT_AI. You are an AI assitant");
+    }
+
+    #[test]
+    fn test_get_model_success(){
+        build_logger("BACHUETECH", "BT.AI_CONFIG", LogLevel::VERBOSE, LogTarget::STD_ERROR );
+        let cfg = AIConfig::new(&"dev".to_string());
+        assert_eq!(cfg.get_model(&"OLLAMALOCAL".to_owned(), &"llama3.1".to_owned(), &"latest".to_owned()),"llama3.1:70b-instruct-q2_K"); //Retrieve version by ID
+    }
+
+    #[test]
+    fn test_get_model_not_found(){
+        build_logger("BACHUETECH", "BT.AI_CONFIG", LogLevel::VERBOSE, LogTarget::STD_ERROR );
+        let cfg = AIConfig::new(&"dev".to_string());
+        //llama31 is not in the file, Use Model ID
+        assert_eq!(cfg.get_model(&"OLLAMALOCAL".to_owned(), &"llama31".to_owned(), &"latest".to_owned()),"llama31:latest"); 
+    }
+
+    #[test]
+    fn test_get_model_not_found_emptyver(){
+        build_logger("BACHUETECH", "BT.AI_CONFIG", LogLevel::VERBOSE, LogTarget::STD_ERROR );
+        let cfg = AIConfig::new(&"dev".to_string());
+        //llama31 is not in the file, Use Model ID
+        assert_eq!(cfg.get_model(&"OLLAMALOCAL".to_owned(), &"llama31".to_owned(), &"".to_owned()),"llama31"); 
+    }
+
+    #[test]
+    fn test_get_model_not_found_wver(){
+        build_logger("BACHUETECH", "BT.AI_CONFIG", LogLevel::VERBOSE, LogTarget::STD_ERROR );
+        let cfg = AIConfig::new(&"dev".to_string());
+        //llama31 is not in the file, use ID and passed version
+        assert_eq!(cfg.get_model(&"OLLAMALOCAL".to_owned(), &"llama31".to_owned(), &"ver2".to_owned()),"llama31:ver2"); 
+    }
 }
