@@ -5,11 +5,11 @@ use crate::{ai_tools::Tool, message::{Message, MessageRole}};
 
 #[derive(Serialize)]
 pub struct AIChatRequest {
-    model: String,
-    messages: Vec<Message>,
-    stream: bool,
+    pub model: String,
+    pub messages: Vec<Message>,
+    pub stream: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
-    tools: Option<Vec<Tool>>,
+    pub tools: Option<Vec<Tool>>,
 }
 
 
