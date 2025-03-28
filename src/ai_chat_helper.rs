@@ -30,9 +30,9 @@ pub struct AIChatResponse {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct AIChatBodyMessage {
-    message: Message,
-    context: Vec<Message>,
-    done: bool,
+    pub message: Message,
+    pub context: Vec<Message>,
+    pub done: bool,
 }
 
 pub fn get_chat_request( ai_model: &String, role: MessageRole, message: &String, context: Vec<Message>, system: Option<String>, tool_list: Option<Vec<Tool>>,
