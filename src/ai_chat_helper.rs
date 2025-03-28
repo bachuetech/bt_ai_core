@@ -15,17 +15,17 @@ pub struct AIChatRequest {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct AIChatResponse {
-    model: String,
-    created_at: String,
-    message: Message,
-    done_reason: String,
-    done: bool,
-    total_duration: u128,
-    load_duration: u128,
-    prompt_eval_count: u64,
-    prompt_eval_duration: u128,
-    eval_count: u64,
-    eval_duration: u128,
+    pub model: String,
+    pub created_at: String,
+    pub message: Message,
+    pub done_reason: String,
+    pub done: bool,
+    pub total_duration: u128,
+    pub load_duration: u128,
+    pub prompt_eval_count: u64,
+    pub prompt_eval_duration: u128,
+    pub eval_count: u64,
+    pub eval_duration: u128,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
