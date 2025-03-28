@@ -37,20 +37,19 @@ pub struct AIChatBodyMessage {
     pub done: bool,
 }
 
-pub fn get_chat_request( ai_model: &String, role: MessageRole, message: &String, context: Vec<Message>, system: Option<String>, tool_list: Option<Vec<Tool>>, 
+/*pub fn get_chat_request( ai_model: &String, role: MessageRole, message: &String, context: Vec<Message>, system: Option<String>, tool_list: Option<Vec<Tool>>, 
                         current_date: &str, current_time: &str, ) -> String {
     let ai_request = get_chat_ai_chat_request(ai_model, role, message, context, system, tool_list, current_date, current_time);
-    get_chat_request_json(ai_request)
-}
+    get_chat_request_json(&ai_request)
+}*/
 
-pub fn get_chat_request_json(ai_request: AIChatRequest) -> String{
+pub fn get_chat_request_json(ai_request: &AIChatRequest) -> String{
     match serde_json::to_string(&ai_request) {
         Ok(sj) => {
             return sj;
         }
         Err(e) => {
-            let bem = format!("{{\"model\": \"{}\", \"message\": \"{:?}\", \"stream\": false}}",
-                                        &ai_request.model, &ai_request.messages );
+            let bem = format!("{{\"model\": \"{}\", \"message\": \"{:?}\", \"stream\": false}}",&ai_request.model, &ai_request.messages );
             log_error!( "get_chat_request", "Error creating JSON Request. Returning default message as a best effort with no tools: {}. Error: {}", &bem, e );
             return bem;
         }
@@ -65,10 +64,7 @@ pub fn get_chat_ai_chat_request( ai_model: &String, role: MessageRole, message: 
     if let Some(sys_msg) = system {
         initial_msg.push(Message::new(
             MessageRole::SYSTEM,
-            format!(
-                "{}. The current date is {} and the current time is {}",
-                sys_msg, &current_date, &current_time
-            ),
+            format!("{}. The current date is {} and the current time is {}", sys_msg, &current_date, &current_time),
         ));
     }
     initial_msg.extend(context.clone()); //payload.context.clone());
@@ -90,9 +86,7 @@ pub fn get_chat_ai_chat_request( ai_model: &String, role: MessageRole, message: 
 mod tests_ai_config {
     use bt_logger::{LogLevel, LogTarget, build_logger};
 
-    use crate::message::MessageRole;
-
-    use super::get_chat_request;
+    use crate::{ai_chat_helper::{get_chat_ai_chat_request, get_chat_request_json}, message::MessageRole};
 
     #[test]
     fn test_chat_req_success() {
@@ -102,7 +96,8 @@ mod tests_ai_config {
             LogLevel::VERBOSE,
             LogTarget::STD_ERROR,
         );
-        let resp = get_chat_request(
+        //let resp = get_chat_request(
+            let resp = get_chat_ai_chat_request(
             &"llama3.1".to_string(),
             MessageRole::USER,
             &"The prompt".to_string(),
@@ -112,8 +107,9 @@ mod tests_ai_config {
             "03/27/2025",
             "6:45 PM",
         );
+        let json_resp = get_chat_request_json(&resp);
         let json_a = "{\"model\":\"llama3.1\",\"messages\":[{\"role\":\"system\",\"content\":\"AI Assistant. The current date is 03/27/2025 and the current time is 6:45 PM\"},{\"role\":\"user\",\"content\":\"The prompt\"}],\"stream\":false}";
-        println!("MSG: {}", &resp);
-        assert_eq!(resp, json_a);
+        println!("MSG: {}", &json_resp);
+        assert_eq!(json_resp, json_a);
     }
 }
