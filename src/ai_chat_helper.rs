@@ -1,0 +1,94 @@
+use bt_logger::{log_error, log_trace};
+use serde::{Deserialize, Serialize};
+
+use crate::{ai_tools::Tool, message::{Message, MessageRole}};
+
+#[derive(Serialize)]
+pub struct AIChatRequest {
+    model: String,
+    messages: Vec<Message>,
+    stream: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    tools: Option<Vec<Tool>>,
+}
+
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct AIChatResponse {
+    model: String,
+    created_at: String,
+    message: Message,
+    done_reason: String,
+    done: bool,
+    total_duration: u128,
+    load_duration: u128,
+    prompt_eval_count: u64,
+    prompt_eval_duration: u128,
+    eval_count: u64,
+    eval_duration: u128,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct AIChatBodyMessage {
+    message: Message,
+    context: Vec<Message>,
+    done: bool,
+}
+
+pub fn get_chat_request( ai_model: &String, role: MessageRole, message: &String, context: Vec<Message>, system: Option<String>, tool_list: Option<Vec<Tool>>,
+                        current_date: &str, current_time: &str) -> String {
+    log_trace!( "model_chat", "Ready to start chat role {:?}: {}", &role, &message );
+
+    let mut initial_msg: Vec<Message> = Vec::new();
+    if let Some(sys_msg) = system {
+        initial_msg.push(Message::new(
+            MessageRole::SYSTEM,
+            format!("{}. The current date is {} and the current time is {}",sys_msg, &current_date, &current_time),
+        ));
+    }
+    initial_msg.extend(context.clone()); //payload.context.clone());
+    let user_message = Message::new(role, message.to_string());
+    initial_msg.push(user_message.clone()); //Needed Later to build the context (history)
+
+    let ai_request = AIChatRequest {
+        model: ai_model.to_owned(),
+        messages: initial_msg.clone(),
+        stream: false,
+        tools: tool_list.clone(),
+    };
+
+    match serde_json::to_string(&ai_request){
+        Ok(sj) => {
+            //log_verbose!("get_chat_request", "Request: {}", &sj);
+            return sj
+        },
+        Err(e) => {
+            let bem = format!("{{\"model\": \"{}\", \"message\": \"{}\", \"stream\": false}}",&ai_model,&message);
+            log_error!("get_chat_request","Error creating JSON Request. Returning default message as a best effort with no tools: {}. Error: {}",&bem, e);
+            return bem
+        },
+    }
+}
+
+
+//**********/
+//UNIT TEST
+//*********/
+#[cfg(test)]
+mod tests_ai_config{
+    use bt_logger::{build_logger, LogLevel, LogTarget};
+
+    use crate::message::MessageRole;
+
+    use super::get_chat_request;
+
+    #[test]
+    fn test_chat_req_success(){
+        build_logger("BACHUETECH", "BT.AI_CHAT_HELPER", LogLevel::VERBOSE, LogTarget::STD_ERROR );
+        let resp = get_chat_request(&"llama3.1".to_string(),MessageRole::USER, &"The prompt".to_string(), Vec::new(), 
+            Some("AI Assistant".to_owned()), None, "03/27/2025", "6:45 PM");
+        let json_a = "{\"model\":\"llama3.1\",\"messages\":[{\"role\":\"system\",\"content\":\"AI Assistant. The current date is 03/27/2025 and the current time is 6:45 PM\"},{\"role\":\"user\",\"content\":\"The prompt\"}],\"stream\":false}";
+        println!("MSG: {}", &resp);
+        assert_eq!(resp,json_a);
+    }
+}
