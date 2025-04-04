@@ -29,6 +29,14 @@ impl Message{
         }
     }
 
+    pub fn new_with_tools(role: MessageRole,  msg_content: String, tools: Vec<ToolToCall>) -> Self{
+        Message{
+            role: role,
+            content: msg_content,
+            tool_calls: Some(tools),
+        }
+    }
+
     /*pub fn new_from_json(json_message: String) -> Self{
         serde_json::from_str(&json_message).unwrap()
     }*/
