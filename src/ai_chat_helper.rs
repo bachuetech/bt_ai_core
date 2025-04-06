@@ -20,14 +20,21 @@ pub struct AIChatResponse {
     pub model: String,
     pub created_at: String,
     pub message: Message,
-    pub done_reason: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub done_reason: Option<String>,
     pub done: bool,
-    pub total_duration: u128,
-    pub load_duration: u128,
-    pub prompt_eval_count: u64,
-    pub prompt_eval_duration: u128,
-    pub eval_count: u64,
-    pub eval_duration: u128,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub total_duration: Option<u128>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub load_duration: Option<u128>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub prompt_eval_count: Option<u64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub prompt_eval_duration: Option<u128>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub eval_count: Option<u64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub eval_duration: Option<u128>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
