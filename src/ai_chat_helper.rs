@@ -57,7 +57,7 @@ pub fn get_chat_request_json(ai_request: &AIChatRequest) -> String{
 }
 
 pub fn get_chat_ai_chat_request( ai_model: &String, role: MessageRole, message: &String, context: Vec<Message>, system: Option<String>, tool_list: Option<Vec<Tool>>, 
-                                current_date: &str, current_time: &str, ) -> AIChatRequest {
+                                current_date: &str, current_time: &str, stream_ans: bool ) -> AIChatRequest {
     log_trace!( "model_chat", "Ready to start chat role {:?}: {}", &role, &message );
 
     let mut initial_msg: Vec<Message> = Vec::new();
@@ -74,7 +74,7 @@ pub fn get_chat_ai_chat_request( ai_model: &String, role: MessageRole, message: 
     AIChatRequest {
         model: ai_model.to_owned(),
         messages: initial_msg.clone(),
-        stream: false,
+        stream: stream_ans,
         tools: tool_list.clone(),
     }
 }
@@ -106,6 +106,7 @@ mod tests_ai_config {
             None,
             "03/27/2025",
             "6:45 PM",
+            false
         );
         let json_resp = get_chat_request_json(&resp);
         let json_a = "{\"model\":\"llama3.1\",\"messages\":[{\"role\":\"system\",\"content\":\"AI Assistant. The current date is 03/27/2025 and the current time is 6:45 PM\"},{\"role\":\"user\",\"content\":\"The prompt\"}],\"stream\":false}";
