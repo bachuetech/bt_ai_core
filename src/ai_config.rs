@@ -32,6 +32,11 @@ struct AIApis {
 pub struct AIConfig {
     name: String,
     platforms: HashMap<String, Platform>,
+}#[derive(Debug, PartialEq, Clone)]
+pub enum SupportedFunctions {
+    ALL,
+    NONE,
+    Functions(Vec<String>),
 }
 
 
@@ -42,12 +47,7 @@ struct Platform {
     models: HashMap<String, Model>,
 }
 
-#[derive(Debug, PartialEq, Clone)]
-pub enum SupportedFunctions {
-    ALL,
-    NONE,
-    Functions(Vec<String>),
-}
+
 
 impl SupportedFunctions {
     /// Method to convert a comma-separated string into a list of names

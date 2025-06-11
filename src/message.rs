@@ -9,6 +9,7 @@ pub enum MessageRole{
     ASSISTANT,
     SYSTEM,
     TOOL,
+    IPYTHON,
     ERROR,
 }
 

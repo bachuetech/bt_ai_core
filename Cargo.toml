@@ -1,6 +1,6 @@
 [package]
 name = "bt_ai_core"
-version = "0.1.13"
+version = "0.1.14"
 edition = "2024"
 authors = ["calvarez <calvarez@bachuetech.biz>"]
 description = "BachueTech AI Core"
@@ -10,7 +10,7 @@ bt_app_codes = { git = "https://github.com/bachuetech/bt_app_codes.git", version
 bt_file_utils = "0.1.2"
 bt_http_utils = "0.7.1"
 bt_logger = "0.2.5"
-bt_yaml_utils = "0.1.2"
+bt_yaml_utils = "0.1.8"
 serde = { version ="1.0.219", features = ["derive"]}
 serde_json = "1.0.140"
-yaml-rust2 = "0.10.1"
+yaml-rust2 = "0.10.3"
