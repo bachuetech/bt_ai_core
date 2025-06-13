@@ -13,6 +13,19 @@ pub enum MessageRole{
     ERROR,
 }
 
+impl MessageRole {
+    fn as_str(&self) -> &'static str {
+        match self{
+            MessageRole::USER => "user",
+            MessageRole::ASSISTANT => "assistant",
+            MessageRole::SYSTEM => "system",
+            MessageRole::TOOL => "tool",
+            MessageRole::IPYTHON => "ipython",
+            MessageRole::ERROR => "error",
+        }
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Message{
     role: MessageRole,
@@ -98,4 +111,15 @@ mod tests_message{
         assert_eq!(msg.content,ctt);
         assert_eq!(msg.get_tools().unwrap()[0].get_function_name(),"FunctName");
     }
+
+    #[test]
+    fn test_as_str() {
+        assert_eq!(MessageRole::USER.as_str(), "user");
+        assert_eq!(MessageRole::ASSISTANT.as_str(), "assistant");
+        assert_eq!(MessageRole::SYSTEM.as_str(), "system");
+        assert_eq!(MessageRole::TOOL.as_str(), "tool");
+        assert_eq!(MessageRole::IPYTHON.as_str(), "ipython");
+        assert_eq!(MessageRole::ERROR.as_str(), "error");
+    }
+
 }
