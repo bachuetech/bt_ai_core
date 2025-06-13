@@ -14,7 +14,7 @@ pub enum MessageRole{
 }
 
 impl MessageRole {
-    fn as_str(&self) -> &'static str {
+    pub fn as_str(&self) -> &'static str {
         match self{
             MessageRole::USER => "user",
             MessageRole::ASSISTANT => "assistant",
