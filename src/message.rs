@@ -26,6 +26,12 @@ impl MessageRole {
     }
 }
 
+impl PartialEq<MessageRole> for &MessageRole {
+    fn eq(&self, other: &MessageRole) -> bool {
+        **self == *other
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Message{
     role: MessageRole,
@@ -54,6 +60,10 @@ impl Message{
     /*pub fn new_from_json(json_message: String) -> Self{
         serde_json::from_str(&json_message).unwrap()
     }*/
+
+    pub fn push_to_content(&mut self, addtional_str: &String){
+        self.content.push_str(addtional_str);
+    }
 
     pub fn get_content(&self) -> &String{
         &self.content
