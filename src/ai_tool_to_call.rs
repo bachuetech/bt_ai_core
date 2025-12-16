@@ -61,7 +61,7 @@ mod tests_tool_to_call{
 
 #[test]
 fn test_tool_to_call(){
-    build_logger("BACHUETECH", "BT.AI_TOOL2CALL", LogLevel::VERBOSE, LogTarget::STD_ERROR );
+    build_logger("BACHUETECH", "BT.AI_TOOL2CALL", LogLevel::VERBOSE, LogTarget::STD_ERROR, None );
     let mut arg: HashMap<String, Value> = HashMap::new();
     arg.insert("ARG1".to_owned(), Value::String("Value1".to_owned()));
     let ftc = FunctionToCall{
@@ -79,7 +79,7 @@ fn test_tool_to_call(){
 
 #[test]
 fn test_tool_to_call_new(){
-    build_logger("BACHUETECH", "BT.AI_TOOL2CALL", LogLevel::VERBOSE, LogTarget::STD_ERROR );
+    build_logger("BACHUETECH", "BT.AI_TOOL2CALL", LogLevel::VERBOSE, LogTarget::STD_ERROR, None );
     let mut arg: HashMap<String, Value> = HashMap::new();
     arg.insert("ARG1".to_owned(), Value::String("Value1".to_owned()));
 

@@ -101,7 +101,7 @@ mod tests_ai_config {
             "BACHUETECH",
             "BT.AI_CHAT_HELPER",
             LogLevel::VERBOSE,
-            LogTarget::STD_ERROR,
+            LogTarget::STD_ERROR, None
         );
         //let resp = get_chat_request(
             let resp = get_chat_ai_chat_request(

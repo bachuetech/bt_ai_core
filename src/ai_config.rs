@@ -1,7 +1,7 @@
-use std::{collections::HashMap, process};
+use std::{collections::HashMap, error::Error};
 
-use bt_app_codes::{labels::{AI_PLATFORM_LABEL, HOST_LABEL, PORT_LABEL, SERVER_LABEL}, process_exit_codes::AI_CONFIG_READING_ERROR};
-use bt_logger::{log_fatal, log_warning};
+use bt_app_codes::{labels::{AI_PLATFORM_LABEL, HOST_LABEL, PORT_LABEL, SERVER_LABEL}};
+use bt_logger::{get_fatal, log_warning};
 use bt_yaml_utils::{convert_yaml_to_vec_string, get_yaml};
 use yaml_rust2::Yaml;
 
@@ -94,13 +94,14 @@ pub enum InteractionType {
 
 impl AIConfig {
     // Constructor to read from YAML file
-    pub fn new(run_env: &String) -> Self {
+    pub fn new(run_env: &String) -> Result<Self, Box<dyn Error>> {
         let ai_config: Yaml;
         match get_yaml(AI_YML_CONFIG_ENV_VAR_NAME,AI_YML_CONFIG){
             Ok(y_file_conf) => ai_config = y_file_conf,
             Err(e) => {
-                log_fatal!("new","Fatal Error Reading AI configuration (PEC={}). Application aborted! {}",AI_CONFIG_READING_ERROR, e.to_string()); 
-                process::exit(AI_CONFIG_READING_ERROR);
+                //log_fatal!("new","Fatal Error Reading AI configuration (PEC={}). Application aborted! {}",AI_CONFIG_READING_ERROR, e.to_string()); 
+                //process::exit(AI_CONFIG_READING_ERROR);
+                return Err( get_fatal!("new","Fatal Error Reading AI configuration. Error: {}",e.to_string() ).into() )
             }, // Exit the program with code -102 },,
         }
 
@@ -203,10 +204,10 @@ impl AIConfig {
 
         }
 
-        Self {
+        Ok(Self {
             name: ai_config["name"].as_str().unwrap_or(DEFAULT_NAME).to_owned(),
             platforms: platform_list,
-        }
+        })
     }
 
     fn get_platform(&self, name: &String) -> Option<&Platform> {
@@ -310,8 +311,8 @@ mod tests_ai_config{
     
     #[test]
     fn test_cfg_success(){
-        build_logger("BACHUETECH", "BT.AI_CONFIG", LogLevel::VERBOSE, LogTarget::STD_ERROR );
-        let cfg = AIConfig::new(&"dev".to_string());
+        build_logger("BACHUETECH", "BT.AI_CONFIG", LogLevel::VERBOSE, LogTarget::STD_ERROR, None );
+        let cfg = AIConfig::new(&"dev".to_string()).unwrap();
         assert_eq!(cfg.get_name(),"BT_AI");
         assert_eq!(cfg.get_platform_list().len(),2);
         assert_eq!(cfg.get_max_ctx_size(&"OLLAMALOCAL".to_string()),20);
@@ -323,8 +324,8 @@ mod tests_ai_config{
 
     #[test]
     fn test_cfg_wrong(){
-        build_logger("BACHUETECH", "BT.AI_CONFIG", LogLevel::VERBOSE, LogTarget::STD_ERROR );
-        let cfg = AIConfig::new(&"dev".to_string());
+        build_logger("BACHUETECH", "BT.AI_CONFIG", LogLevel::VERBOSE, LogTarget::STD_ERROR, None );
+        let cfg = AIConfig::new(&"dev".to_string()).unwrap();
          assert_eq!(cfg.get_max_ctx_size(&"wrong".to_string()),5);
         assert_eq!(cfg.get_url("wrong".to_string(), InteractionType::Chat),"http://127.0.0.1:11434/api/chat");
         assert_eq!(cfg.get_url("wrong".to_string(), InteractionType::Generate),"http://127.0.0.1:11434/api/generate");
@@ -334,8 +335,8 @@ mod tests_ai_config{
 
     #[test]
     fn test_cfg_not_found_success(){
-        build_logger("BACHUETECH", "BT.AI_CONFIG", LogLevel::VERBOSE, LogTarget::STD_ERROR );
-        let cfg = AIConfig::new(&"UNKNOWN".to_string());  
+        build_logger("BACHUETECH", "BT.AI_CONFIG", LogLevel::VERBOSE, LogTarget::STD_ERROR, None );
+        let cfg = AIConfig::new(&"UNKNOWN".to_string()).unwrap();  
         assert_eq!(cfg.get_name(),"BT_AI");
         assert_eq!(cfg.get_platform_list().len(),0);  
         assert_eq!(cfg.get_max_ctx_size(&"UNKNOWN".to_string()),5);
@@ -347,14 +348,14 @@ mod tests_ai_config{
 
     #[test]
     fn test_supp_funct_all_none(){
-        build_logger("BACHUETECH", "BT.AI_CONFIG", LogLevel::VERBOSE, LogTarget::STD_ERROR );
+        build_logger("BACHUETECH", "BT.AI_CONFIG", LogLevel::VERBOSE, LogTarget::STD_ERROR, None );
         assert_eq!(SupportedFunctions::from("All".to_string()), SupportedFunctions::ALL);
         assert_eq!(SupportedFunctions::from("None".to_string()),SupportedFunctions::NONE);
     }
 
     #[test]
     fn test_supp_funct_func(){
-        build_logger("BACHUETECH", "BT.AI_CONFIG", LogLevel::VERBOSE, LogTarget::STD_ERROR );
+        build_logger("BACHUETECH", "BT.AI_CONFIG", LogLevel::VERBOSE, LogTarget::STD_ERROR, None );
         let ffn = "Fake_func".to_owned();
         let f = SupportedFunctions::from(ffn.clone());
         let sf;
@@ -369,53 +370,53 @@ mod tests_ai_config{
 
     #[test]
     fn test_not_noenv_sys_msg(){
-        build_logger("BACHUETECH", "BT.AI_CONFIG", LogLevel::VERBOSE, LogTarget::STD_ERROR );
-        let cfg = AIConfig::new(&"UNKNOWN".to_string());  
+        build_logger("BACHUETECH", "BT.AI_CONFIG", LogLevel::VERBOSE, LogTarget::STD_ERROR, None );
+        let cfg = AIConfig::new(&"UNKNOWN".to_string()).unwrap();  
         //assert_eq!(cfg.get_system_msg(&"OLLAMALOCAL".to_owned(), &"llama3.1".to_owned()).unwrap(),"You are an AI assitant");
         assert!(cfg.get_system_msg(&"OLLAMALOCAL".to_owned(), &"llama3.1".to_owned()).is_none());
     }
 
     #[test]
     fn test_sys_msg_success(){
-        build_logger("BACHUETECH", "BT.AI_CONFIG", LogLevel::VERBOSE, LogTarget::STD_ERROR );
-        let cfg = AIConfig::new(&"dev".to_string());
+        build_logger("BACHUETECH", "BT.AI_CONFIG", LogLevel::VERBOSE, LogTarget::STD_ERROR, None );
+        let cfg = AIConfig::new(&"dev".to_string()).unwrap();
         assert_eq!(cfg.get_system_msg(&"OLLAMALOCAL".to_owned(), &"guardian".to_owned()).unwrap(),"Your Are BT_AI. Answer only either Yes or No.");
     }
 
     #[test]
     fn test_sys_msg_default(){
-        build_logger("BACHUETECH", "BT.AI_CONFIG", LogLevel::VERBOSE, LogTarget::STD_ERROR );
-        let cfg = AIConfig::new(&"dev".to_string());
+        build_logger("BACHUETECH", "BT.AI_CONFIG", LogLevel::VERBOSE, LogTarget::STD_ERROR, None );
+        let cfg = AIConfig::new(&"dev".to_string()).unwrap();
         assert_eq!(cfg.get_system_msg(&"OLLAMALOCAL".to_owned(), &"llama123".to_owned()).unwrap(),"Your Are BT_AI. You are an AI assitant");
     }
 
     #[test]
     fn test_get_model_success(){
-        build_logger("BACHUETECH", "BT.AI_CONFIG", LogLevel::VERBOSE, LogTarget::STD_ERROR );
-        let cfg = AIConfig::new(&"dev".to_string());
+        build_logger("BACHUETECH", "BT.AI_CONFIG", LogLevel::VERBOSE, LogTarget::STD_ERROR, None );
+        let cfg = AIConfig::new(&"dev".to_string()).unwrap();
         assert_eq!(cfg.get_model(&"OLLAMALOCAL".to_owned(), &"llama3.1".to_owned(), &"latest".to_owned()),"llama3.1:70b-instruct-q2_K"); //Retrieve version by ID
     }
 
     #[test]
     fn test_get_model_not_found(){
-        build_logger("BACHUETECH", "BT.AI_CONFIG", LogLevel::VERBOSE, LogTarget::STD_ERROR );
-        let cfg = AIConfig::new(&"dev".to_string());
+        build_logger("BACHUETECH", "BT.AI_CONFIG", LogLevel::VERBOSE, LogTarget::STD_ERROR, None );
+        let cfg = AIConfig::new(&"dev".to_string()).unwrap();
         //llama31 is not in the file, Use Model ID
         assert_eq!(cfg.get_model(&"OLLAMALOCAL".to_owned(), &"llama31".to_owned(), &"latest".to_owned()),"llama31:latest"); 
     }
 
     #[test]
     fn test_get_model_not_found_emptyver(){
-        build_logger("BACHUETECH", "BT.AI_CONFIG", LogLevel::VERBOSE, LogTarget::STD_ERROR );
-        let cfg = AIConfig::new(&"dev".to_string());
+        build_logger("BACHUETECH", "BT.AI_CONFIG", LogLevel::VERBOSE, LogTarget::STD_ERROR, None );
+        let cfg = AIConfig::new(&"dev".to_string()).unwrap();
         //llama31 is not in the file, Use Model ID
         assert_eq!(cfg.get_model(&"OLLAMALOCAL".to_owned(), &"llama31".to_owned(), &"".to_owned()),"llama31"); 
     }
 
     #[test]
     fn test_get_model_not_found_wver(){
-        build_logger("BACHUETECH", "BT.AI_CONFIG", LogLevel::VERBOSE, LogTarget::STD_ERROR );
-        let cfg = AIConfig::new(&"dev".to_string());
+        build_logger("BACHUETECH", "BT.AI_CONFIG", LogLevel::VERBOSE, LogTarget::STD_ERROR, None );
+        let cfg = AIConfig::new(&"dev".to_string()).unwrap();
         //llama31 is not in the file, use ID and passed version
         assert_eq!(cfg.get_model(&"OLLAMALOCAL".to_owned(), &"llama31".to_owned(), &"ver2".to_owned()),"llama31:ver2"); 
     }
