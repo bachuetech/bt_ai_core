@@ -94,7 +94,7 @@ pub enum InteractionType {
 
 impl AIConfig {
     // Constructor to read from YAML file
-    pub fn new(run_env: &String) -> Result<Self, Box<dyn Error>> {
+    pub fn new(run_env: &str) -> Result<Self, Box<dyn Error>> {
         let ai_config: Yaml;
         match get_yaml(AI_YML_CONFIG_ENV_VAR_NAME,AI_YML_CONFIG){
             Ok(y_file_conf) => ai_config = y_file_conf,
@@ -106,7 +106,7 @@ impl AIConfig {
         }
 
         let mut platform_list: HashMap<String, Platform> = HashMap::new();
-        for plat in ai_config[run_env.as_str()][AI_PLATFORM_LABEL].clone() {
+        for plat in ai_config[run_env][AI_PLATFORM_LABEL].clone() {
 
             let port = match plat[SERVER_LABEL][PORT_LABEL].as_i64(){
                 Some(pn) => {
@@ -221,7 +221,7 @@ impl AIConfig {
 
     pub fn get_url(&self, platform_name: String, int_type: InteractionType) -> String {
         if let Some(p) = self.get_platform(&platform_name) {
-            return match int_type {
+            match int_type {
                 InteractionType::Chat => {
                     format!("{}{}", p.ai_url, p.api.chat.clone())
                 }
@@ -231,14 +231,14 @@ impl AIConfig {
                 InteractionType::Models => {
                     format!("{}{}", p.ai_url.clone(), p.api.models.clone())
                 }
-            };
+            }
         } else {
             log_warning!("get_url","Platform {} NOT found. Using default values!",&platform_name);
-            return match int_type { //Default Values!
+            match int_type { //Default Values!
                 InteractionType::Chat => "http://localhost/default/chat".to_owned(),
                 InteractionType::Generate => "http://localhost/default/generate".to_owned(),
                 InteractionType::Models => "http://localhost/default/models".to_owned(),
-            };
+            }
         }
 
 
@@ -250,30 +250,28 @@ impl AIConfig {
 
     pub fn get_models(&self, platform_name: &String) ->  Option<&HashMap<String, Model>>{
         if let Some(p) = self.get_platform(platform_name) {
-            return Some(&p.models)
+            Some(&p.models)
         }else{
-            return None
+            None
         }
     }
 
     pub fn get_model(&self, platform_name: &String, model_id: &String, model_version: &String) -> String {
-        if let Some(p) = self.get_models(platform_name) {
-            if let Some(model) = p.get(model_id) {
+        if let Some(p) = self.get_models(platform_name) && let Some(model) = p.get(model_id) {
                 return model.model.clone()
-            } 
         }
 
-        if model_version.trim().len() > 0{
-            return format!("{}:{}",model_id.clone(),model_version)
+        if ! model_version.trim().is_empty() {
+            format!("{}:{}",model_id.clone(),model_version)
         }else{
-            return model_id.clone()
+            model_id.clone()
         }
     }    
 
     pub fn get_system_msg(&self, platform_name: &String, model_id: &String) -> Option<String> {
         if let Some(p) = self.get_models(platform_name) {
             if let Some(sys) = p.get(model_id) {
-                Some(format!("{}. {}", format!("Your Are {}", self.get_name()), sys.system))
+                Some(format!("Your Are {}. {}", self.get_name(), sys.system))
             } else {
                 if model_id.to_lowercase() == "default" {
                     None
@@ -288,7 +286,7 @@ impl AIConfig {
 
     pub fn get_max_ctx_size(&self, platform_name: &String) -> usize {
         if let Some(p) = self.get_platform(platform_name) {
-            p.api.ctx_max as usize
+            p.api.ctx_max
         }else{
             log_warning!("get_max_ctx_size","Maximun Size of Context for platform {} not found. Using default value {}",platform_name, DEFAULT_MAX_CTX_SIZE);
             DEFAULT_MAX_CTX_SIZE

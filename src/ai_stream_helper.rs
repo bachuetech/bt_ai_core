@@ -33,7 +33,7 @@ pub async fn process_stream(mut streamer: HttpStreamResponse) -> HttpResponse{
         match serde_json::from_str(&int_http_resp.body){
             Ok(r) => {
                 last_response = r;
-                streamed_content.push_str(&last_response.message.get_content());
+                streamed_content.push_str(last_response.message.get_content());
 
                 if streamed_tools.is_none(){
                     streamed_tools = last_response.message.get_tools();
@@ -72,18 +72,18 @@ pub async fn process_stream(mut streamer: HttpStreamResponse) -> HttpResponse{
         eval_duration: last_response.eval_duration,
     };
 
-    let j_body: String;
+    //let j_body: String;
 
     log_verbose!("process_stream", "Convert to JSON");
-    match serde_json::to_string(&cr){
-        Ok(j) => j_body = j,
+    let j_body: String = match serde_json::to_string(&cr){
+        Ok(j) =>  j,
         Err(e) => {
             log_error!("process_stream","Body {:?} cannot be converted to JSON. Error {}",&cr,e);
-            j_body = "".to_owned();
+            "".to_owned()
         },
-    }
+    };
 
-    return HttpResponse{
+    HttpResponse{
         status_code: streamer.get_status(),
         header: streamer.get_ini_header(),
         body: j_body,

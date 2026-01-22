@@ -43,7 +43,7 @@ pub struct Message{
 impl Message{
     pub fn new(role: MessageRole,  msg_content: String) -> Self{
         Message{
-            role: role,
+            role,
             content: msg_content,
             tool_calls: None,
         }
@@ -51,7 +51,7 @@ impl Message{
 
     pub fn new_with_tools(role: MessageRole,  msg_content: String, tools: Vec<ToolToCall>) -> Self{
         Message{
-            role: role,
+            role,
             content: msg_content,
             tool_calls: Some(tools),
         }
@@ -61,7 +61,7 @@ impl Message{
         serde_json::from_str(&json_message).unwrap()
     }*/
 
-    pub fn push_to_content(&mut self, addtional_str: &String){
+    pub fn push_to_content(&mut self, addtional_str: &str){
         self.content.push_str(addtional_str);
     }
 
@@ -72,10 +72,6 @@ impl Message{
     pub fn get_role(&self) -> &MessageRole{
         &self.role
     }
-
-    /*pub fn get_message_json(&self) -> String{
-         serde_json::to_string(self).unwrap()
-    }*/
 
     pub fn get_tools(&self) -> Option<Vec<ToolToCall>> {
         self.tool_calls.clone()

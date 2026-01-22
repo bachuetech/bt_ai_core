@@ -50,7 +50,7 @@ pub struct ToolParamProperty{
 }
 
 impl AIToolManager {
-    pub fn new(run_environment: &String) -> Result<Self, Box<dyn Error>>  {
+    pub fn new(run_environment: &str) -> Result<Self, Box<dyn Error>>  {
         let tools_def: String;
         match get_file(TOOLS_JSON_DEF_ENV_VAR_NAME, TOOLS_JSON_DEF){
             Ok(j_file_conf) => tools_def = j_file_conf,
@@ -58,7 +58,7 @@ impl AIToolManager {
                 log_warning!("new","Error loding JSON tools configuration file. Using Empty tools as default. Error: {}",e.to_string()); 
                 return Ok(Self{
                     tools: None,
-                    ai_config: AIConfig::new(&run_environment)?, 
+                    ai_config: AIConfig::new(run_environment)?, 
                 }) //tools_def = "".to_owned();
             },
         }
@@ -67,14 +67,14 @@ impl AIToolManager {
             Ok(t) => {
                 Ok(Self{ 
                     tools: Some(t),
-                    ai_config: AIConfig::new(&run_environment)?,
+                    ai_config: AIConfig::new(run_environment)?,
                 }) //json_tools: tools_def, tool_count: num_tools}
             }
             Err(e) => {
                 log_warning!("AIToolManager:new", "Error loading tools or No tools available: {}", e) ;
                 Ok(Self{
                     tools: None, 
-                    ai_config: AIConfig::new(&run_environment)?,
+                    ai_config: AIConfig::new(run_environment)?,
                 }) //json_tools: "".to_owned(), tool_count: 0 }
             }
         }

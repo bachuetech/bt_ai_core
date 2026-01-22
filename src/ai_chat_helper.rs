@@ -53,12 +53,12 @@ pub struct AIChatBodyMessage {
 pub fn get_chat_request_json(ai_request: &AIChatRequest) -> String{
     match serde_json::to_string(&ai_request) {
         Ok(sj) => {
-            return sj;
+            sj
         }
         Err(e) => {
             let bem = format!("{{\"model\": \"{}\", \"message\": \"{:?}\", \"stream\": false}}",&ai_request.model, &ai_request.messages );
             log_error!( "get_chat_request", "Error creating JSON Request. Returning default message as a best effort with no tools: {}. Error: {}", &bem, e );
-            return bem;
+            bem
         }
     }
 }
